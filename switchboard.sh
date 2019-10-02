@@ -6,8 +6,8 @@ if [ $EUID -eq 0 ]; then
 fi
 
 # Set format to json so jq can be used
-export CRAY_FORMAT=json
 export CRAY_AUTH_LOGIN_USERNAME=$USER
+READY_RETRIES=15
 
 function create_uai() {
   UAS_CREATE=$(cray uas create --publickey ~/.ssh/id_rsa.pub)
