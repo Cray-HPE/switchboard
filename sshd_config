@@ -10,4 +10,4 @@ UseDNS no
 
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /root/switchboard/switchboard.sh
+	ForceCommand /opt/cray/switchboard/bin/switchboard.sh

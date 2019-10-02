@@ -17,6 +17,7 @@ Switchboard also requires that users are able to ssh AND authenticate with
 ### Installation
 An rpm will eventually be available.
 
+cd /opt/cray/
 git clone ssh://git@stash.us.cray.com:7999/~alanm/switchboard.git
 
 ### Usage
@@ -26,7 +27,7 @@ ForceCommand setting in an sshd_config file:
 ```bash
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /opt/cray/switchboard.sh
+	ForceCommand /opt/cray/switchboard/bin/switchboard.sh
 ```
 
 This `Match User` block may be added to the sshd listening on port 22 or it
