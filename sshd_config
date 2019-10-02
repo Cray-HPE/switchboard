@@ -1,4 +1,4 @@
-Port 40
+Port 203
 AuthorizedKeysFile	.ssh/authorized_keys
 UsePAM yes
 X11Forwarding yes

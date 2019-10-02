@@ -47,13 +47,10 @@ if ! echo $UAS_LIST | jq -e .[] 2>&1 /dev/null; then
   exit 1
 fi
 
-# TODO filter list using this nifty trick
-# jq '.[] | select(.uai_status=="Running: Ready")'
-
 NUM_UAI=$(echo $UAS_LIST | jq '.|length')
 
 if [ $NUM_UAI -lt 1 ]; then
-  echo "Creating a UAI"
+  echo "Creating a UAI..."
   create_uai
   for i in $(seq 1 $READY_RETRIES); do
     if cray uas list --format json | jq -e '.[] | select(.uai_status=="Running: Ready")'; then
@@ -67,7 +64,6 @@ if [ $NUM_UAI -lt 1 ]; then
     fi
   done
   # We got here so there is a UAI in "Running: Ready"
-  echo
   $(cray uas list --format json | jq -r '.[0] | .uai_connect_string')
   exit 0
 fi
