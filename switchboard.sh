@@ -8,6 +8,7 @@ fi
 # Set format to json so jq can be used
 export CRAY_AUTH_LOGIN_USERNAME=$USER
 READY_RETRIES=15
+SPIN='-\|/'
 
 function create_uai() {
   UAS_CREATE=$(cray uas create --publickey ~/.ssh/id_rsa.pub)
@@ -54,7 +55,6 @@ NUM_UAI=$(echo $UAS_LIST | jq '.|length')
 if [ $NUM_UAI -lt 1 ]; then
   echo "Creating a UAI"
   create_uai
-  local -a marks=( '/' '-' '\' '|' )
   for i in $(seq 1 $READY_RETRIES); do
     if cray uas list --format json | jq -e '.[] | select(.uai_status=="Running: Ready")'; then
       break
@@ -62,11 +62,12 @@ if [ $NUM_UAI -lt 1 ]; then
       echo "Timed out waiting for UAI"
       exit 1
     else
-      printf '%s\r' "${marks[i++ % ${#marks[@]}]}"
+      printf "\r${SPIN:$(((i+1)%4)):1}"
       sleep 1
     fi
   done
   # We got here so there is a UAI in "Running: Ready"
+  echo
   $(cray uas list --format json | jq -r '.[0] | .uai_connect_string')
   exit 0
 fi
