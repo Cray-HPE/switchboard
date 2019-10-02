@@ -18,19 +18,24 @@ echo "Checking for authentication with Keycloak..."
 cray init --overwrite --no-auth \
           --hostname https://api-gw-service-nmn.local > /dev/null
 
+echo "Verifying ssh keys exist..."
+verify_ssh_keys_exist
+
 # Check if a simple command returns 401. If it doesn't,
 # we don't need to force the user to authenticate again 
 # as they may already have a valid token
-if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
+#TODO Fix tokens expiring with /userinfo
+#if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
+if cray uas list 2>&1 | grep --silent "Token not valid for UAS"; then
   echo "Log in as $USER to Keycloak..."
   cray auth login
 fi
 
 echo "Checking for running UAIs..."
-UAS_LIST=$(cray uas list)
+UAS_LIST=$(cray uas list --format json)
 
 # Make sure we are able to parse the UAS_LIST with jq
-if ! echo $UAS_LIST | jq -e > /dev/null; then
+if ! echo $UAS_LIST | jq -e .[] 2>&1 /dev/null; then
   echo "Could not parse list of UAIs..."
   exit 1
 fi
@@ -53,6 +58,8 @@ if [ $NUM_UAI -eq 1 ]; then
 fi
 
 if [ $NUM_UAI -gt 1 ]; then
+  # Print a table of UAIs and prepend a number (awk) so 
+  # users are able to select a UAI by number
   echo $UAS_LIST | jq -r '.[] | "\(.uai_name) \t \(.uai_status) \t \(.uai_age) \t \(.uai_img)"' | awk '{print NR, "\t", $0}'
   read -p "Select a UAI by number: " selection
   selection="$(($selection-1))"
@@ -61,8 +68,6 @@ if [ $NUM_UAI -gt 1 ]; then
   #  echo "Invalid selection"
   #  exit 1
   #fi
-  echo "Logging in to UAI:"
-  echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string'
   $(echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string')
   exit 0
 fi
