@@ -4,10 +4,6 @@
 export CRAY_FORMAT=json
 export CRAY_AUTH_LOGIN_USERNAME=$USER
 
-function uas_output_parse() {
-  echo $1 | grep $2| grep -o '".*' | tr -d '"'
-}
-
 function create_uai() {
   UAS_CREATE=$(cray uas create --publickey ~/.ssh/id_rsa.pub)
 }
@@ -18,7 +14,7 @@ function verify_ssh_keys_exist() {
   yes no | ssh-keygen -f ~/.ssh/id_rsa -N "" > /dev/null
 }
 
-echo "Authenticate with Cray DC LDAP..."
+echo "Checking for authentication with Keycloak..."
 cray init --overwrite --no-auth \
           --hostname https://api-gw-service-nmn.local > /dev/null
 
@@ -26,6 +22,7 @@ cray init --overwrite --no-auth \
 # we don't need to force the user to authenticate again 
 # as they may already have a valid token
 if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
+  echo "Log in as $USER to Keycloak..."
   cray auth login
 fi
 

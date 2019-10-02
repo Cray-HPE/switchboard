@@ -10,4 +10,4 @@ UseDNS no
 
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /tmp/entry.sh
+	ForceCommand /tmp/switchboard.sh
