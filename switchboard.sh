@@ -2,6 +2,7 @@
 
 # Set format to json so jq can be used
 export CRAY_FORMAT=json
+export CRAY_AUTH_LOGIN_USERNAME=$USER
 
 function uas_output_parse() {
   echo $1 | grep $2| grep -o '".*' | tr -d '"'
@@ -25,7 +26,7 @@ cray init --overwrite --no-auth \
 # we don't need to force the user to authenticate again 
 # as they may already have a valid token
 if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
-  cray auth login --username $USER
+  cray auth login
 fi
 
 echo "Checking for running UAIs..."
@@ -55,8 +56,16 @@ if [ $NUM_UAI -eq 1 ]; then
 fi
 
 if [ $NUM_UAI -gt 1 ]; then
-  echo $UAS_LIST | jq -r '.[] | "\(.uai_name) \t \(.uai_status) \t \(.uai_img)"' | awk '{print NR, "\t", $0}'
+  echo $UAS_LIST | jq -r '.[] | "\(.uai_name) \t \(.uai_status) \t \(.uai_age) \t \(.uai_img)"' | awk '{print NR, "\t", $0}'
   read -p "Select a UAI by number: " selection
+  selection="$(($selection-1))"
+  # TODO fix this
+  #if ! (( 0 <= $selection < $NUM_UAI )); then
+  #  echo "Invalid selection"
+  #  exit 1
+  #fi
+  echo "Logging in to UAI:"
+  echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string'
   $(echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string')
   exit 0
 fi
