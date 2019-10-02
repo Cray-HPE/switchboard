@@ -19,6 +19,7 @@ An rpm will eventually be available.
 
 cd /opt/cray/
 git clone ssh://git@stash.us.cray.com:7999/~alanm/switchboard.git
+/usr/sbin/sshd -f switchboard/sshd_config
 
 ### Usage
 Switchboard may be run as a interactive script but it works best as a 
