@@ -52,8 +52,9 @@ fi
 NUM_UAI=$(echo $UAS_LIST | jq '.|length')
 
 if [ $NUM_UAI -lt 1 ]; then
-  echo "Creating a UAI..."
+  echo "Creating a UAI"
   create_uai
+  local -a marks=( '/' '-' '\' '|' )
   for i in $(seq 1 $READY_RETRIES); do
     if cray uas list --format json | jq -e '.[] | select(.uai_status=="Running: Ready")'; then
       break
@@ -61,11 +62,12 @@ if [ $NUM_UAI -lt 1 ]; then
       echo "Timed out waiting for UAI"
       exit 1
     else
+      printf '%s\r' "${marks[i++ % ${#marks[@]}]}"
       sleep 1
     fi
   done
   # We got here so there is a UAI in "Running: Ready"
-  $(echo $UAS_LIST | jq -r '.[0] | .uai_connect_string')
+  $(cray uas list --format json | jq -r '.[0] | .uai_connect_string')
   exit 0
 fi
 
