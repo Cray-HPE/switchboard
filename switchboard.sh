@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $EUID -eq 0 ]; then
+   echo "switchboard.sh must not be run as root" 
+   exit 1
+fi
+
 # Set format to json so jq can be used
 export CRAY_FORMAT=json
 export CRAY_AUTH_LOGIN_USERNAME=$USER
