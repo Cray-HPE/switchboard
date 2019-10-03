@@ -31,12 +31,15 @@ verify_ssh_keys_exist
 # we don't need to force the user to authenticate again 
 # as they may already have a valid token
 #TODO Fix tokens expiring with /userinfo
+#TODO Fix unhandled error if cray uas list returns "Internal Server Error"
 #if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
 if cray uas list 2>&1 | egrep --silent "Token not valid for UAS|401 Unauthorized"; then
   echo "cray auth login --username $USER..."
   #TODO add retries 
   cray auth login
 fi
+
+#TODO bail if cray auth login didn't succeed
 
 echo "Checking for running UAIs..."
 UAS_LIST=$(cray uas list --format json)
@@ -49,6 +52,9 @@ fi
 
 NUM_UAI=$(echo $UAS_LIST | jq '.|length')
 
+################
+## Start UAI  ##
+################
 if [ $NUM_UAI -lt 1 ]; then
   echo "Creating a UAI..."
   create_uai
@@ -68,12 +74,18 @@ if [ $NUM_UAI -lt 1 ]; then
   exit 0
 fi
 
+################
+## Single UAI ##
+################
 if [ $NUM_UAI -eq 1 ]; then
   echo "Using existing UAI connection string..."
   $(echo $UAS_LIST | jq -r '.[0] | .uai_connect_string') $SSH_ORIGINAL_COMMAND
   exit 0
 fi
 
+################
+## UAI Select ##
+################
 if [ $NUM_UAI -gt 1 ]; then
   # Print a table of UAIs and prepend a number (awk) so 
   # users are able to select a UAI by number
@@ -88,3 +100,6 @@ if [ $NUM_UAI -gt 1 ]; then
   $(echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string') $SSH_ORIGINAL_COMMAND
   exit 0
 fi
+
+# Shouldn't get here
+exit 2
