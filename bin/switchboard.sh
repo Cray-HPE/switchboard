@@ -64,13 +64,13 @@ if [ $NUM_UAI -lt 1 ]; then
     fi
   done
   # We got here so there is a UAI in "Running: Ready"
-  $(cray uas list --format json | jq -r '.[0] | .uai_connect_string')
+  $(cray uas list --format json | jq -r '.[0] | .uai_connect_string') $SSH_ORIGINAL_COMMAND
   exit 0
 fi
 
 if [ $NUM_UAI -eq 1 ]; then
   echo "Using existing UAI connection string..."
-  $(echo $UAS_LIST | jq -r '.[0] | .uai_connect_string')
+  $(echo $UAS_LIST | jq -r '.[0] | .uai_connect_string') $SSH_ORIGINAL_COMMAND
   exit 0
 fi
 
@@ -85,6 +85,6 @@ if [ $NUM_UAI -gt 1 ]; then
   #  echo "Invalid selection"
   #  exit 1
   #fi
-  $(echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string')
+  $(echo $UAS_LIST | jq -r --arg INDEX $selection '.[$INDEX|tonumber] | .uai_connect_string') $SSH_ORIGINAL_COMMAND
   exit 0
 fi
