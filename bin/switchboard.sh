@@ -32,7 +32,7 @@ verify_ssh_keys_exist
 # as they may already have a valid token
 #TODO Fix tokens expiring with /userinfo
 #if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
-if cray uas list 2>&1 | grep --silent "Token not valid for UAS"; then
+if cray uas list 2>&1 | egrep --silent "Token not valid for UAS|401 Unauthorized"; then
   echo "cray auth login --username $USER..."
   #TODO add retries 
   cray auth login
