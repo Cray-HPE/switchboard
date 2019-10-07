@@ -17,9 +17,11 @@ Switchboard also requires that users are able to ssh AND authenticate with
 ### Installation
 An rpm will eventually be available.
 
+```bash
 cd /opt/cray/
 git clone ssh://git@stash.us.cray.com:7999/~alanm/switchboard.git
 /usr/sbin/sshd -f switchboard/sshd_config
+```
 
 ### Usage
 Switchboard may be run as a interactive script but it works best as a 
@@ -49,7 +51,7 @@ ask for a second password.
 
 ### Example
 ```bash
-arbus:~ $ ssh -p 40 slice-uan01
+arbus:~ $ ssh -p 203 slice-uan01
 Warning: Permanently added '[slice-sms]:40,[172.30.52.70]:40' (ECDSA) to the list of known hosts.
 Password:
 Checking for authentication with Keycloak...
