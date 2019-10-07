@@ -37,9 +37,13 @@ if cray uas list 2>&1 | egrep --silent "Token not valid for UAS|401 Unauthorized
   echo "cray auth login --username $USER..."
   #TODO add retries 
   cray auth login
+  AUTH_RC=$?
 fi
 
-#TODO bail if cray auth login didn't succeed
+if [ $AUTH_RC -ne 0 ]; then
+  echo "cray auth login failed..."
+  exit 1
+fi
 
 echo "Checking for running UAIs..."
 UAS_LIST=$(cray uas list --format json)
