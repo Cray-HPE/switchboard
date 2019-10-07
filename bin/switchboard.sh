@@ -34,7 +34,7 @@ verify_ssh_keys_exist
 #TODO Fix unhandled error if cray uas list returns "Internal Server Error"
 #if cray uas mgr-info list 2>&1 | grep --silent "401 Unauthorized"; then
 AUTH_RC=0
-if cray uas list 2>&1 | egrep --silent "Token not valid for UAS|401 Unauthorized"; then
+if cray uas list 2>&1 | egrep --silent "Token not valid for UAS|401 Unauthorized|Internal Server"; then
   echo "cray auth login --username $USER..."
   #TODO add retries 
   cray auth login
