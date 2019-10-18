@@ -1,11 +1,14 @@
 #!/bin/bash
 
+#
+# Copyright 2019, Cray Inc.  All Rights Reserved.
+#
+
 if [ $EUID -eq 0 ]; then
-   echo "switchboard.sh must not be run as root" 
+   echo "switchboard must not be run as root" 
    exit 1
 fi
 
-# Set format to json so jq can be used
 export CRAY_AUTH_LOGIN_USERNAME=$USER
 READY_RETRIES=15
 SPIN='-\|/'
