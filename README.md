@@ -10,31 +10,38 @@ requirements are:
 * cray-uas-mgr
 * Keycloak
 
-Switchboard also requires that users are able to ssh AND authenticate with
-`cray auth login`.
-
+Switchboard also requires that users are able to authenticate with `cray auth login`.
 
 ### Installation
-An rpm will eventually be available.
 
 ```bash
-cd /opt/cray/
-git clone ssh://git@stash.us.cray.com:7999/~alanm/switchboard.git
-/usr/sbin/sshd -f switchboard/sshd_config
+rpm -i cray-switchboard-crayctldeploy
+systemctl start cray-switchboard-sshd
+```
+
+An ansible role is also available that will simply start the service.
+switchboard/tasks/main.yml:
+```bash
+- name: Start the cray-switchboard-sshd service
+  systemd:
+    state: started
+    enabled: yes
+    name: cray-switchboard-sshd
 ```
 
 ### Usage
-Switchboard may be run as a interactive script but it works best as a 
+switchboard may be run as a interactive command but it works best as a 
 ForceCommand setting in an sshd_config file:
 
 ```bash
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /opt/cray/switchboard/bin/switchboard.sh
+	ForceCommand /opt/cray/switchboard/src/switchboard
 ```
 
-This `Match User` block may be added to the sshd listening on port 22 or it
-may also be used for an sshd server listening on an alternate port.
+This `Match User` block may be added to the sshd listening on port 22 but by 
+default switchboard is configured to start an sshd service listening on
+port 203.
 
 This will redirect all users (except root) through the switchboard logic. The 
 possible outcomes are:
@@ -69,4 +76,21 @@ ssh alanm@172.30.52.72 -p 32283 -i ~/.ssh/id_rsa
 \____//_/ |_|/_/  |_|/_/   \____//_/  |_|/___/
 
 alanm@uai-alanm-017a3df1-54d985fb7b-5k7w2:~>
+```
+
+The switchboard command will also perform the same logic when used interactively:
+```bash
+alanm@uan01:~> switchboard
+Checking for authentication with Keycloak...
+Verifying ssh keys exist...
+Checking for running UAIs...
+Using existing UAI connection string...
+Warning: Permanently added '[172.30.52.72]:30980' (ECDSA) to the list of known hosts.
+   ______ ____   ___ __  __   __  __ ___     ____
+  / ____// __ \ /   |\ \/ /  / / / //   |   /  _/
+ / /    / /_/ // /| | \  /  / / / // /| |   / /
+/ /___ / _, _// ___ | / /  / /_/ // ___ | _/ /
+\____//_/ |_|/_/  |_|/_/   \____//_/  |_|/___/
+
+alanm@uai-alanm-6034192a-7968b8b47b-f58n6:~>
 ```
