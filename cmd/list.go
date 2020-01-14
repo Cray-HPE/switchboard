@@ -24,13 +24,12 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "list the running User Access Instances",
+	Long: `Show the User Access Instances that are already running for the user.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+$ switchboard list:
+1    uai-alanm-017a3df1      Running: Ready      16m     sms.local:5000/cray/cray-uas-sles15-slurm:latest
+2    uai-alanm-fddee5bb      Running: Ready      15m     sms.local:5000/cray/cray-uas-sles15-pbs:latest`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
 	},

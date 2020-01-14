@@ -24,13 +24,12 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "SSH to an existing or newly created User Access Instance",
+	Long: `The follow logic will occur with the start command:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Start a UAI if one is not already running and SSH to it once it is available.
+SSH to a UAI already running if only one UAI is found
+Choose a UAI to SSH to if multiple are found`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("start called")
 	},

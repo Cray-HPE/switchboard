@@ -32,13 +32,16 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
   Use:   "switchboard",
-  Short: "A brief description of your application",
-  Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+  Short: "Switchboard is a tool to redirect users into a User Access Instance.",
+  Long: `Switchboard will automate the process of creating, listing, and deleting 
+User Access Instances (UAIs). In addition to running the neccessary 'cray 
+uas' commands, switchboard will make sure the user is authenticated to 
+the Shasta system. 
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+The following commands are supported:
+switchboard start
+switchboard list
+switchboard delete (NOT IMPLEMENTED)`,
   // Uncomment the following line if your bare application
   // has an action associated with it:
   //	Run: func(cmd *cobra.Command, args []string) { },
