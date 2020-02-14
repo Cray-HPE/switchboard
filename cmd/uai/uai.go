@@ -81,13 +81,12 @@ func UaiList() []Uai {
 }
 
 // Delete a UAI by name NOT DONE
-/*func UaiDelete(uais []Uai) {
+func UaiDelete(uais string) {
 	// Create a string list of uai names from uais
 	// TODO fix path to ~
 	cmd := exec.Command("cray", "uas", "delete", "--format", "json",
-			 "--uai-list", uaiList)
-        var uai Uai
-        stdout, err := cmd.StdoutPipe()
+			 "--uai-list", uais)
+        _, err := cmd.StdoutPipe()
         if err != nil {
                 log.Fatal(err)
         }
@@ -95,15 +94,13 @@ func UaiList() []Uai {
         if err := cmd.Start(); err != nil {
                 log.Fatal(err)
         }
-        err = json.NewDecoder(stdout).Decode(&uai)
         if (err != nil) {
                 log.Fatal(err)
         }
         if err := cmd.Wait(); err != nil {
                 log.Fatal(err)
         }
-	return uai
-}*/
+}
 
 /*
 Func to tabwriter a slice of type Uai in the format:
