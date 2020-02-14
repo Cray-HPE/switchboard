@@ -9,7 +9,22 @@ import (
         "encoding/json"
 )
 
-// A struct to represent a UAI from uas-mgr
+/* 
+A struct to represent a UAI from uas-mgr which has a json representation of
+[
+  {
+    "uai_age": "4d17h",
+    "uai_connect_string": "ssh alanm@172.30.48.15 -p 31370 -i ~/.ssh/id_rsa",
+    "uai_host": "ncn-w001",
+    "uai_img": "bis.local:5000/cray/cray-uas-sles15-slurm:latest",
+    "uai_msg": "ContainerCreating",
+    "uai_name": "uai-alanm-b1a72874",
+    "uai_portmap": {},
+    "uai_status": "Waiting",
+    "username": "alanm"
+  },
+]
+*/
 type Uai struct {
 	Name string `json:"uai_name"`
 	Username string `json:"username"`
@@ -65,7 +80,37 @@ func UaiList() []Uai {
 	return uais
 }
 
-// Func to tabwriter a slice of type Uai
+// Delete a UAI by name NOT DONE
+/*func UaiDelete(uais []Uai) {
+	// Create a string list of uai names from uais
+	// TODO fix path to ~
+	cmd := exec.Command("cray", "uas", "delete", "--format", "json",
+			 "--uai-list", uaiList)
+        var uai Uai
+        stdout, err := cmd.StdoutPipe()
+        if err != nil {
+                log.Fatal(err)
+        }
+	fmt.Println("Deleting UAI(s)...")
+        if err := cmd.Start(); err != nil {
+                log.Fatal(err)
+        }
+        err = json.NewDecoder(stdout).Decode(&uai)
+        if (err != nil) {
+                log.Fatal(err)
+        }
+        if err := cmd.Wait(); err != nil {
+                log.Fatal(err)
+        }
+	return uai
+}*/
+
+/*
+Func to tabwriter a slice of type Uai in the format:
+#       Name                    Status                          Age     Image
+1       uai-alanm-b1a72874      Running:Ready                   4d18h   bis.local:5000/cray/cray-uas-sles15-slurm:latest
+2       uai-alanm-f6a0e079      Running:Ready                   19m     bis.local:5000/cray/cray-uas-sles15-slurm:latest
+*/
 func UaiPrettyPrint(uais []Uai) {
         w := new(tabwriter.Writer)
         w.Init(os.Stdout, 0, 8, 0, '\t', 0)
@@ -79,19 +124,3 @@ func UaiPrettyPrint(uais []Uai) {
         }
         w.Flush()
 }
-
-/*
-[
-  {
-    "uai_age": "4d17h",
-    "uai_connect_string": "ssh alanm@172.30.48.15 -p 31370 -i ~/.ssh/id_rsa",
-    "uai_host": "ncn-w001",
-    "uai_img": "bis.local:5000/cray/cray-uas-sles15-slurm:latest",
-    "uai_msg": "ContainerCreating",
-    "uai_name": "uai-alanm-b1a72874",
-    "uai_portmap": {},
-    "uai_status": "Waiting",
-    "username": "alanm"
-  },
-]
-*/

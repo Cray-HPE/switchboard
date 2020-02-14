@@ -3,11 +3,14 @@ package cmd
 import (
 	"bufio"
 	"os"
+	"os/exec"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
 	"log"
+
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
         "stash.us.cray.com/uan/switchboard/cmd/uai"
 )
@@ -22,32 +25,48 @@ SSH to a UAI already running if only one UAI is found
 Choose a UAI to SSH to if multiple are found`,
 	Run: start,
 }
+var s *spinner.Spinner
 
-/*func runSshCmd(sshCmd string) {
-	var args = strings.Fields(sshCmd)
-	env := os.Environ()
-	fmt.Printf("Running ssh command: '%q'", args)
-	cmd := exec.Command(args[0], args[1:len(args)]..., env)
-	err := cmd.Run()
-	log.Printf("Command finished with error: %v", err)
+// SpinnerStart will start a spinner/waiting message that will go until we stop it
+func SpinnerStart(message string) {
+	fmt.Print(fmt.Sprintf("%s...", message))
+	s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	s.Start()
+}
 
-}*/
+// SpinnerStop will stop/cancel a spinner
+func SpinnerStop() {
+	if s.Active() {
+		s.Stop()
+	}
+	fmt.Println()
+}
 
+// TODO introduce a timeout to this endless function
 func waitForRunningReady(uaiName string) {
         var uais []uai.Uai
         var status string
+	SpinnerStart("Waiting for UAI to be ready")
 	for (status != "Running: Ready") {
-		//fmt.Printf("Running UaiList\n")
 		uais = uai.UaiList()
 		for _,uai := range uais {
-			//fmt.Printf("Searching for UAI\n")
 			if (uaiName == uai.Name) {
 				status = uai.StatusMessage + uai.Status
-				//fmt.Printf("status: '%s'\n", status)
 			}
 		}
 		time.Sleep(1 * time.Second)
 	}
+	SpinnerStop()
+}
+
+func runSshCmd(sshCmd string) {
+	sshArgs := strings.Fields(sshCmd)
+	sshExec := exec.Command(sshArgs[0], sshArgs[1:]...)
+	sshExec.Stdout = os.Stdout
+	sshExec.Stdin = os.Stdin
+	sshExec.Stderr = os.Stderr
+	sshExec.Run()
+	//TODO make this a function and return correct exit code
 }
 
 func start(cmd *cobra.Command, args []string) {
@@ -78,7 +97,7 @@ func start(cmd *cobra.Command, args []string) {
 		sshCmd = uais[selection-1].ConnectionString
 	}
 	fmt.Printf("SSH Connection string:\n%s\n", sshCmd)
-	//runSshCmd(sshCmd)
+	runSshCmd(sshCmd)
 }
 
 func init() {
