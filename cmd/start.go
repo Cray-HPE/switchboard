@@ -43,6 +43,8 @@ func SpinnerStop() {
 }
 
 // TODO introduce a timeout to this endless function
+// TODO pass in a uai instead to immediately check
+//	status (it may already be Running: Ready)
 func waitForRunningReady(uaiName string) {
         var uais []uai.Uai
         var status string
@@ -66,7 +68,7 @@ func runSshCmd(sshCmd string) {
 	sshExec.Stdin = os.Stdin
 	sshExec.Stderr = os.Stderr
 	sshExec.Run()
-	//TODO make this a function and return correct exit code
+	//TODO return correct exit code from ssh
 }
 
 func start(cmd *cobra.Command, args []string) {
@@ -79,7 +81,9 @@ func start(cmd *cobra.Command, args []string) {
 		waitForRunningReady(freshUai.Name)
 		sshCmd = freshUai.ConnectionString
 	case 1:
-		waitForRunningReady(uais[0].Name)
+		if uais[0].StatusMessage + uais[0].Status != "Running: Ready" {
+			waitForRunningReady(uais[0].Name)
+		}
 		sshCmd = uais[0].ConnectionString
 	default:
 		uai.UaiPrettyPrint(uais)

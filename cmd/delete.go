@@ -1,22 +1,22 @@
 package cmd
 
 import (
-        "bufio"
-        "os"
-        "fmt"
-        "strconv"
-        "strings"
-        "log"
+	"bufio"
+	"os"
+	"fmt"
+	"strconv"
+	"strings"
+	"log"
 
 	"github.com/spf13/cobra"
-        "stash.us.cray.com/uan/switchboard/cmd/uai"
+	"stash.us.cray.com/uan/switchboard/cmd/uai"
 )
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "A brief description of your command",
-	Long: `Not Implemented.`,
+	Short: "Delete User Access Instances currently running",
+	Long: `Delete User Access Instances currently running.`,
 	Run: delete,
 }
 
@@ -30,10 +30,10 @@ func delete(cmd *cobra.Command, args []string) {
         input, _ := reader.ReadString('\n')
         selection, err := strconv.Atoi(strings.TrimSuffix(input, "\n"))
         if err != nil {
-        	log.Fatal(err)
+		log.Fatal(err)
         }
         if (selection <= 0) || (selection > len(uais)) {
-        	log.Fatal("Number was not valid")
+		log.Fatal("Number was not valid")
         }
 	uai.UaiDelete(uais[selection-1].Name)
 }

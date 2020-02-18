@@ -8,7 +8,7 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list the running User Access Instances",
+	Short: "List the running User Access Instances",
 	Long: `Show the User Access Instances that are already running for the user.
 
 $ switchboard list

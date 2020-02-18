@@ -3,11 +3,11 @@ package cmd
 import (
   "fmt"
   "os"
-  "github.com/spf13/cobra"
+  "os/exec"
 
   homedir "github.com/mitchellh/go-homedir"
   "github.com/spf13/viper"
-
+  "github.com/spf13/cobra"
 )
 var cfgFile string
 
@@ -23,11 +23,12 @@ the Shasta system.
 The following commands are supported:
 switchboard start
 switchboard list
-switchboard delete (NOT IMPLEMENTED)`,
+switchboard delete)`,
 }
 
 func init() {
   cobra.OnInitialize(initConfig)
+  checkCmdExists("cray")
 
   // Here you will define your flags and configuration settings.
   // Cobra supports persistent flags, which, if defined here,
@@ -69,14 +70,13 @@ func initConfig() {
 }
 
 // Check for craycli
-/*func checkCmdExists(cmd string) {
-	path, err := exec.LookPath(cmd)
+func checkCmdExists(cmd string) {
+	_, err := exec.LookPath(cmd)
 	if err != nil {
 		fmt.Printf("Could not find the command %s\n", cmd)
-		return 1
+		os.Exit(1)
 	}
-	return 0
-}*/
+}
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
