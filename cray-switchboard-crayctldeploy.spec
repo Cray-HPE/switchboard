@@ -43,6 +43,7 @@ project.
 %setup -q
 
 %build
+go build -o gogoswitchboard main.go
 
 %install
 # Install ansible files
