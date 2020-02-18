@@ -43,7 +43,7 @@ project.
 %setup -q
 
 %build
-go build -o gogoswitchboard main.go
+go build -o switchboard main.go
 
 %install
 # Install ansible files
@@ -57,7 +57,7 @@ cp -R ansible %{buildroot}%{ansible_dir}
 cp -R ansible/roles/ %{buildroot}%{cme_premium_roles_dir}
 
 %{__install} -m 0644 src/cray-%{cmdname}-sshd.service %{buildroot}%{_unitdir}/cray-%{cmdname}-sshd.service
-%{__install} -m 0755 src/%{cmdname} %{buildroot}%{_bindir}/%{cmdname}
+%{__install} -m 0755 %{cmdname} %{buildroot}%{_bindir}/%{cmdname}
 %{__install} -m 0755 src/sshd_config %{buildroot}%{_sysconfdir}/%{cmdname}/sshd_config
 %{__install} -m 0755 src/ssh %{buildroot}%{_sysconfdir}/%{cmdname}/ssh
 
