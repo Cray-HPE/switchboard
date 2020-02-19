@@ -7,6 +7,8 @@ import (
         "os/exec"
         "text/tabwriter"
         "encoding/json"
+
+	homedir "github.com/mitchellh/go-homedir"
 )
 
 /* 
@@ -36,11 +38,15 @@ type Uai struct {
 	Age string `json:"uai_age"`
 }
 
-// Create a UAI using default parameters (TODO make it configurable)
+// Create a UAI using default parameters
 func UaiCreate() Uai {
-	// TODO fix path to ~
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	cmd := exec.Command("cray", "uas", "create", "--format", "json",
-			 "--publickey", "/Users/alanm/.ssh/id_rsa.pub")
+			 "--publickey", home+"/.ssh/id_rsa.pub")
         var uai Uai
         stdout, err := cmd.StdoutPipe()
         if err != nil {
@@ -80,10 +86,8 @@ func UaiList() []Uai {
 	return uais
 }
 
-// Delete a UAI by name NOT DONE
+// Delete a UAI by name
 func UaiDelete(uais string) {
-	// Create a string list of uai names from uais
-	// TODO fix path to ~
 	cmd := exec.Command("cray", "uas", "delete", "--format", "json",
 			 "--uai-list", uais)
         _, err := cmd.StdoutPipe()

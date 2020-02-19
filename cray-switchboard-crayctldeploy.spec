@@ -43,6 +43,8 @@ project.
 %setup -q
 
 %build
+export GO111MODULE=on
+go get
 go build -o switchboard main.go
 
 %install

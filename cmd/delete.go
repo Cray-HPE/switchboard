@@ -24,18 +24,20 @@ var deleteCmd = &cobra.Command{
 func delete(cmd *cobra.Command, args []string) {
         var uais []uai.Uai
         uais = uai.UaiList()
-        uai.UaiPrettyPrint(uais)
-	fmt.Printf("Select a UAI by number: ")
-        reader := bufio.NewReader(os.Stdin)
-        input, _ := reader.ReadString('\n')
-        selection, err := strconv.Atoi(strings.TrimSuffix(input, "\n"))
-        if err != nil {
-		log.Fatal(err)
-        }
-        if (selection <= 0) || (selection > len(uais)) {
-		log.Fatal("Number was not valid")
-        }
-	uai.UaiDelete(uais[selection-1].Name)
+	if len(uais) > 0 {
+		uai.UaiPrettyPrint(uais)
+		fmt.Printf("Select a UAI by number: ")
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		selection, err := strconv.Atoi(strings.TrimSuffix(input, "\n"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if (selection <= 0) || (selection > len(uais)) {
+			log.Fatal("Number was not valid")
+		}
+		uai.UaiDelete(uais[selection-1].Name)
+	}
 }
 
 func init() {

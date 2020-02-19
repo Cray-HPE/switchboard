@@ -42,49 +42,96 @@ func SpinnerStop() {
 	fmt.Println()
 }
 
-// TODO introduce a timeout to this endless function
-// TODO pass in a uai instead to immediately check
-//	status (it may already be Running: Ready)
-func waitForRunningReady(uaiName string) {
+func waitForRunningReady(targetUai uai.Uai) {
         var uais []uai.Uai
         var status string
+	if targetUai.StatusMessage + targetUai.Status == "Running: Ready" {
+		return
+	}
 	SpinnerStart("Waiting for UAI to be ready")
-	for (status != "Running: Ready") {
-		uais = uai.UaiList()
-		for _,uai := range uais {
-			if (uaiName == uai.Name) {
-				status = uai.StatusMessage + uai.Status
+	timeout := time.After(30 * time.Second)
+	tick := time.Tick(1 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			SpinnerStop()
+			fmt.Printf("Timeout waiting on %s to be 'Running: Ready'\n", targetUai.Name)
+			fmt.Printf("Last status was '%s'\n", status)
+			os.Exit(1)
+		case <-tick:
+			uais = uai.UaiList()
+			for _,uai := range uais {
+				if (targetUai.Name == uai.Name) {
+					status = uai.StatusMessage + uai.Status
+					break
+				}
+			}
+			if (status == "Running: Ready") {
+				SpinnerStop()
+				return
 			}
 		}
-		time.Sleep(1 * time.Second)
 	}
-	SpinnerStop()
 }
 
-func runSshCmd(sshCmd string) {
+// There has to be a better way to do this but
+// It was not obvious how to get only the error number
+// rather than "exit code 123". (improve this later)
+func convertErrorStrToInt(err error) int {
+	var errNum int
+	if err != nil {
+		errS := strings.Fields(err.Error())
+		errNum, _ = strconv.Atoi(errS[2])
+	} else {
+		errNum = 0
+	}
+	return errNum
+}
+
+func runSshCmd(sshCmd string) int {
 	sshArgs := strings.Fields(sshCmd)
+        if sshOriginalCommand, exists := os.LookupEnv("SSH_ORIGINAL_COMMAND"); exists {
+                sshArgs = append(sshArgs, sshOriginalCommand)
+        }
 	sshExec := exec.Command(sshArgs[0], sshArgs[1:]...)
 	sshExec.Stdout = os.Stdout
 	sshExec.Stdin = os.Stdin
 	sshExec.Stderr = os.Stderr
-	sshExec.Run()
-	//TODO return correct exit code from ssh
+	sshExec.Start()
+	ec := sshExec.Wait()
+	return convertErrorStrToInt(ec)
 }
 
 func start(cmd *cobra.Command, args []string) {
         var uais []uai.Uai
 	var sshCmd string
+	var freshUai uai.Uai
+	var oneShot bool
+
+	// Get the list of UAIs available
         uais = uai.UaiList()
-	switch num := len(uais); num {
-	case 0:
-		freshUai := uai.UaiCreate()
-		waitForRunningReady(freshUai.Name)
+
+	// Check for SWITCHBOARD_ONE_SHOT which always creates
+	// and deletes the UAI after logging out
+	if _, exists := os.LookupEnv("SWITCHBOARD_ONE_SHOT"); exists {
+		oneShot = true
+	} else {
+		oneShot = false
+	}
+	switch num := len(uais); {
+
+	// No UAI is running so start up a fresh one
+	case num == 0 || oneShot:
+		freshUai = uai.UaiCreate()
+		waitForRunningReady(freshUai)
 		sshCmd = freshUai.ConnectionString
-	case 1:
-		if uais[0].StatusMessage + uais[0].Status != "Running: Ready" {
-			waitForRunningReady(uais[0].Name)
-		}
+
+	// A single UAI is running, use this one
+	case num == 1:
+		waitForRunningReady(uais[0])
 		sshCmd = uais[0].ConnectionString
+
+	// Multiple UAIs running, prompt the user to pick one
 	default:
 		uai.UaiPrettyPrint(uais)
 		fmt.Printf("Select a UAI by number: ")
@@ -97,11 +144,15 @@ func start(cmd *cobra.Command, args []string) {
 		if (selection <= 0) || (selection > len(uais)) {
 			log.Fatal("Number was not valid")
 		}
-		waitForRunningReady(uais[selection-1].Name)
+		waitForRunningReady(uais[selection-1])
 		sshCmd = uais[selection-1].ConnectionString
 	}
-	fmt.Printf("SSH Connection string:\n%s\n", sshCmd)
-	runSshCmd(sshCmd)
+	ec := runSshCmd(sshCmd)
+	if oneShot {
+		uai.UaiDelete(freshUai.Name)
+	}
+	os.Exit(ec)
+
 }
 
 func init() {

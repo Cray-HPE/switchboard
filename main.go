@@ -1,5 +1,5 @@
 /*
-Copyright © 2020 Alan Mutschelknaus alanm@hpe.com
+Copyright © HPE 2020 Alan Mutschelknaus alanm@hpe.com
 */
 package main
 
