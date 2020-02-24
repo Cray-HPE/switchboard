@@ -12,7 +12,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-        "stash.us.cray.com/uan/switchboard/cmd/uai"
+	"stash.us.cray.com/uan/switchboard/cmd/uai"
 )
 
 var startCmd = &cobra.Command{
@@ -111,9 +111,9 @@ func start(cmd *cobra.Command, args []string) {
 	// Get the list of UAIs available
         uais = uai.UaiList()
 
-	// Check for SWITCHBOARD_ONE_SHOT which always creates
+	// Check for UAI_ONE_SHOT which always creates
 	// and deletes the UAI after logging out
-	if _, exists := os.LookupEnv("SWITCHBOARD_ONE_SHOT"); exists {
+	if _, exists := os.LookupEnv("UAI_ONE_SHOT"); exists {
 		oneShot = true
 	} else {
 		oneShot = false

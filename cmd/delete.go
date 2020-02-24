@@ -22,8 +22,8 @@ var deleteCmd = &cobra.Command{
 
 // TODO Make this work for multiple UAIs
 func delete(cmd *cobra.Command, args []string) {
-        var uais []uai.Uai
-        uais = uai.UaiList()
+	var uais []uai.Uai
+	uais = uai.UaiList()
 	if len(uais) > 0 {
 		uai.UaiPrettyPrint(uais)
 		fmt.Printf("Select a UAI by number: ")

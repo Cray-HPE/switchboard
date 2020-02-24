@@ -3,9 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/spf13/cobra"
+        "stash.us.cray.com/uan/switchboard/cmd/craycli"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -24,15 +24,17 @@ switchboard delete)`,
 }
 
 func init() {
-	checkCmdExists("cray")
-}
-
-// Check for craycli
-func checkCmdExists(cmd string) {
-	_, err := exec.LookPath(cmd)
-	if err != nil {
-		fmt.Printf("Could not find the command %s\n", cmd)
+	if ! craycli.CraycliCmdExists() {
+		fmt.Println("Could not find the cray cli command")
 		os.Exit(1)
+	}
+	if craycli.CraycliCheckOutput("No configuration exists") {
+		fmt.Println("The Cray CLI has not been initialized, running 'cray init':")
+		craycli.CraycliInteractive("cray", "init")
+	}
+	if craycli.CraycliCheckOutput("401 Unauthorized") {
+		fmt.Println("The Cray CLI has not been authorized, running 'cray auth login':")
+		craycli.CraycliInteractive("cray", "auth", "login")
 	}
 }
 
