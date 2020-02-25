@@ -3,7 +3,7 @@ rpmBuild (
     channel: "casm-cloud-alerts",
     slack_notify: ['FAILURE'],
     product: "shasta-standard,shasta-premium",
-    target_node: "ncn",
+    target_node: "cn,ncn",
     recv_triggers: ["cme-premium-cf"],
     buildPrepScript: "switchboardBuildPrep.sh"
 )
