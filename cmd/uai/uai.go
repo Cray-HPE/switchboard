@@ -11,6 +11,9 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
+// Make this a var so it can be replaced for unit testing
+var execCommand = exec.Command
+
 /* 
 A struct to represent a UAI from uas-mgr which has a json representation of
 [
@@ -45,7 +48,7 @@ func UaiCreate() Uai {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	cmd := exec.Command("cray", "uas", "create", "--format", "json",
+	cmd := execCommand("cray", "uas", "create", "--format", "json",
 			 "--publickey", home+"/.ssh/id_rsa.pub")
 	var uai Uai
 	stdout, err := cmd.StdoutPipe()
@@ -68,7 +71,7 @@ func UaiCreate() Uai {
 
 // Run cray uas list and decode the json into a slice of type Uai
 func UaiList() []Uai {
-	cmd := exec.Command("cray", "uas", "list", "--format", "json")
+	cmd := execCommand("cray", "uas", "list", "--format", "json")
 	var uais []Uai
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -88,7 +91,7 @@ func UaiList() []Uai {
 
 // Delete a UAI by name
 func UaiDelete(uais string) {
-	cmd := exec.Command("cray", "uas", "delete", "--format", "json",
+	cmd := execCommand("cray", "uas", "delete", "--format", "json",
 			 "--uai-list", uais)
 	_, err := cmd.StdoutPipe()
 	if err != nil {

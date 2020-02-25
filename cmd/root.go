@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
-        "stash.us.cray.com/uan/switchboard/cmd/craycli"
+	"stash.us.cray.com/uan/switchboard/cmd/craycli"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -24,7 +25,7 @@ switchboard delete)`,
 }
 
 func init() {
-	if ! craycli.CraycliCmdExists() {
+	if _, err := exec.LookPath("cray"); err != nil {
 		fmt.Println("Could not find the cray cli command")
 		os.Exit(1)
 	}
@@ -46,4 +47,3 @@ func Execute() {
 		os.Exit(1)
 	}
 }
-

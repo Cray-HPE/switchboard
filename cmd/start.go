@@ -43,8 +43,8 @@ func SpinnerStop() {
 }
 
 func waitForRunningReady(targetUai uai.Uai) {
-        var uais []uai.Uai
-        var status string
+	var uais []uai.Uai
+	var status string
 	if targetUai.StatusMessage + targetUai.Status == "Running: Ready" {
 		return
 	}
@@ -90,9 +90,9 @@ func convertErrorStrToInt(err error) int {
 
 func runSshCmd(sshCmd string) int {
 	sshArgs := strings.Fields(sshCmd)
-        if sshOriginalCommand, exists := os.LookupEnv("SSH_ORIGINAL_COMMAND"); exists {
-                sshArgs = append(sshArgs, sshOriginalCommand)
-        }
+	if sshOriginalCommand, exists := os.LookupEnv("SSH_ORIGINAL_COMMAND"); exists {
+		sshArgs = append(sshArgs, sshOriginalCommand)
+	}
 	sshExec := exec.Command(sshArgs[0], sshArgs[1:]...)
 	sshExec.Stdout = os.Stdout
 	sshExec.Stdin = os.Stdin
@@ -103,13 +103,13 @@ func runSshCmd(sshCmd string) int {
 }
 
 func start(cmd *cobra.Command, args []string) {
-        var uais []uai.Uai
+	var uais []uai.Uai
 	var sshCmd string
 	var freshUai uai.Uai
 	var oneShot bool
 
 	// Get the list of UAIs available
-        uais = uai.UaiList()
+	uais = uai.UaiList()
 
 	// Check for UAI_ONE_SHOT which always creates
 	// and deletes the UAI after logging out
