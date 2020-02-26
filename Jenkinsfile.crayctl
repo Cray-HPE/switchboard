@@ -1,9 +1,9 @@
 @Library("dst-shared") _
 rpmBuild (
-    channel: "casm-user",
+    channel: "casm-cloud-alerts",
     slack_notify: ['FAILURE'],
-    product: "shasta-premium",
-    target_node: "ncn",
+    product: "shasta-standard,shasta-premium",
+    target_node: "cn,ncn",
     recv_triggers: ["cme-premium-cf"],
     buildPrepScript: "switchboardBuildPrep.sh"
 )
