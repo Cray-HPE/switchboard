@@ -6,7 +6,7 @@
 %define ansible_dir %{crayctl_dir}/ansible_framework
 %define cmdname switchboard
 
-Name: cray-%{cmdname}-crayctldeploy
+Name: cray-%{cmdname}
 License: Cray Software License Agreement
 Summary: %{cmdname}
 Version: %(cat .version)

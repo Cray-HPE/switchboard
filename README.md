@@ -1,21 +1,22 @@
 ![picture](img/switchboard.jpg)
 
 ## Switchboard
-Switchboard is a lightweight utility to redirect users into a User Access Instance.
+Switchboard is a convenience utility to automate the process of managing and connecting
+to User Access Instances. When used as a CLI, switchboard offers the following subcommands:
+$ switchboard start|list|delete
 
 ### Requirements
-Switchboard sits at the top of a fairly large software stack. Some fundamental 
-requirements are:
-* Kubernetes
-* cray-uas-mgr
-* Keycloak
 
-Switchboard also requires that users are able to authenticate with `cray auth login`.
+* The Cray CLI command is present in the users PATH
+* The Shasta API gateway is known and accessible 
+* The user is configured in Keycloak and knows their password
+* The user has RBAC sufficient to create, list, and delete UAIs
 
 ### Installation
 
 ```bash
-rpm -i cray-switchboard-crayctldeploy
+zypper install cray-switchboard
+# Optionally start switchboard with sshd
 systemctl start cray-switchboard-sshd
 ```
 
