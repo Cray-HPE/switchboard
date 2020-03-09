@@ -4,6 +4,6 @@ rpmBuild (
     slack_notify: ['FAILURE'],
     product: "shasta-standard,shasta-premium",
     target_node: "cn,ncn",
-    recv_triggers: ["cme-premium-cf"],
+    fanout_params: ["sle15", "sle15sp1"],
     buildPrepScript: "switchboardBuildPrep.sh"
 )
