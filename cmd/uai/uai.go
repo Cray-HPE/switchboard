@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"text/tabwriter"
 	"encoding/json"
 
@@ -41,15 +42,24 @@ type Uai struct {
 	Age string `json:"uai_age"`
 }
 
+type UaiImages struct {
+	Default string `json:"default_image"`
+	List []string `json:"image_list"`
+}
+
 // Create a UAI using default parameters
-func UaiCreate() Uai {
+func UaiCreate(image string) Uai {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	cmd := execCommand("cray", "uas", "create", "--format", "json",
-			 "--publickey", home+"/.ssh/id_rsa.pub")
+	createArgs := strings.Fields("cray uas create --format json")
+	createArgs = append(createArgs, "--publickey", home+"/.ssh/id_rsa.pub")
+	if image != "" {
+		createArgs = append(createArgs, "--imagename", image)
+	}
+	cmd := execCommand(createArgs[0], createArgs[1:]...)
 	var uai Uai
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -87,6 +97,26 @@ func UaiList() []Uai {
 		log.Fatal(err)
 	}
 	return uais
+}
+
+// Run cray uas images list and decode the json into UaiImages
+func UaiImagesList() UaiImages {
+	cmd := execCommand("cray", "uas", "images", "list", "--format", "json")
+	var uaiImages UaiImages
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+	if err := json.NewDecoder(stdout).Decode(&uaiImages); err != nil {
+		log.Fatal(err)
+	}
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err)
+	}
+	return uaiImages
 }
 
 // Delete a UAI by name

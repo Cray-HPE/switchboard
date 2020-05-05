@@ -12,24 +12,6 @@ $ switchboard start|list|delete
 * The user is configured in Keycloak and knows their password
 * The user has RBAC sufficient to create, list, and delete UAIs
 
-### Installation
-
-```bash
-zypper install cray-switchboard
-# Optionally start switchboard with sshd
-systemctl start cray-switchboard-sshd
-```
-
-An ansible role is also available that will simply start the service.
-switchboard/tasks/main.yml:
-```bash
-- name: Start the cray-switchboard-sshd service
-  systemd:
-    state: started
-    enabled: yes
-    name: cray-switchboard-sshd
-```
-
 ### Usage
 switchboard may be run as a interactive command but it works best as a 
 ForceCommand setting in an sshd_config file:
@@ -37,7 +19,7 @@ ForceCommand setting in an sshd_config file:
 ```bash
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /opt/cray/switchboard/src/switchboard
+	ForceCommand /opt/cray/switchboard/src/switchboard start
 ```
 
 This `Match User` block may be added to the sshd listening on port 22 but by 
@@ -51,11 +33,13 @@ possible outcomes are:
 2. SSH to a UAI already running if only one UAI is found
 3. Choose a UAI to SSH to if multiple are found
 
-Switchboard will autogenerate SSH keys if the user does not already have them
-in their home directory at `~/.ssh/id_rsa`. The user may also be prompted for
-an additional password via `cray auth login` if they do not already have a valid
-token. Depending on the refresh timeout of the token, subsequent logins may not
-ask for a second password.
+The user may also be prompted for an additional password via `cray auth login` 
+if they do not already have a valid token. Depending on the refresh timeout of 
+the token, subsequent logins may not ask for a second password.
+
+By default switchboard will create the a UAI using the default image type. The
+switchboard start commands supports the --image flag to specify a UAI image.
+If a UAI of the correct image type is not already running, one will be started.
 
 ### Example
 ```bash
@@ -63,7 +47,6 @@ arbus:~ $ ssh -p 203 slice-uan01
 Warning: Permanently added '[slice-sms]:40,[172.30.52.70]:40' (ECDSA) to the list of known hosts.
 Password:
 Checking for authentication with Keycloak...
-Verifying ssh keys exist...
 Checking for running UAIs...
 1 	 uai-alanm-017a3df1 	 Running: Ready 	 16m 	 sms.local:5000/cray/cray-uas-sles15-slurm:latest
 2 	 uai-alanm-fddee5bb 	 Running: Ready 	 15m 	 sms.local:5000/cray/cray-uas-sles15-pbs:latest
@@ -81,9 +64,8 @@ alanm@uai-alanm-017a3df1-54d985fb7b-5k7w2:~>
 
 The switchboard command will also perform the same logic when used interactively:
 ```bash
-alanm@uan01:~> switchboard
+alanm@uan01:~> switchboard start
 Checking for authentication with Keycloak...
-Verifying ssh keys exist...
 Checking for running UAIs...
 Using existing UAI connection string...
 Warning: Permanently added '[172.30.52.72]:30980' (ECDSA) to the list of known hosts.

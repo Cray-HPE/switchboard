@@ -27,6 +27,8 @@ Choose a UAI to SSH to if multiple are found`,
 }
 var s *spinner.Spinner
 
+var image string
+
 // SpinnerStart will start a spinner/waiting message that will go until we stop it
 func SpinnerStart(message string) {
 	fmt.Print(fmt.Sprintf("%s...", message))
@@ -104,12 +106,10 @@ func runSshCmd(sshCmd string) int {
 
 func start(cmd *cobra.Command, args []string) {
 	var uais []uai.Uai
+	var images uai.UaiImages
 	var sshCmd string
-	var freshUai uai.Uai
+	var targetUai uai.Uai
 	var oneShot bool
-
-	// Get the list of UAIs available
-	uais = uai.UaiList()
 
 	// Check for UAI_ONE_SHOT which always creates
 	// and deletes the UAI after logging out
@@ -118,43 +118,80 @@ func start(cmd *cobra.Command, args []string) {
 	} else {
 		oneShot = false
 	}
-	switch num := len(uais); {
 
-	// No UAI is running so start up a fresh one
-	case num == 0 || oneShot:
-		freshUai = uai.UaiCreate()
-		waitForRunningReady(freshUai)
-		sshCmd = freshUai.ConnectionString
+	// Get the list of UAIs available
+	uais = uai.UaiList()
 
-	// A single UAI is running, use this one
-	case num == 1:
-		waitForRunningReady(uais[0])
-		sshCmd = uais[0].ConnectionString
-
-	// Multiple UAIs running, prompt the user to pick one
-	default:
-		uai.UaiPrettyPrint(uais)
-		fmt.Printf("Select a UAI by number: ")
-		reader := bufio.NewReader(os.Stdin)
-		input, _ := reader.ReadString('\n')
-		selection, err := strconv.Atoi(strings.TrimSuffix(input, "\n"))
-		if err != nil {
-			log.Fatal(err)
+	// Get a list of allowable images
+	images = uai.UaiImagesList()
+	if image != "" {
+		for i,img := range images.List {
+			if (img == image) {
+				break
+			}
+			if i == len(images.List)-1 {
+				fmt.Printf("Invalid image requested: %s\n", image)
+				fmt.Printf("Allowable images are: %s\n", strings.Join(images.List, ", "))
+				os.Exit(1)
+			}
 		}
-		if (selection <= 0) || (selection > len(uais)) {
-			log.Fatal("Number was not valid")
-		}
-		waitForRunningReady(uais[selection-1])
-		sshCmd = uais[selection-1].ConnectionString
 	}
+
+	switch num := len(uais); {
+	case num == 0 || oneShot:
+		targetUai = uai.UaiCreate(image)
+
+	case num == 1:
+		if image == "" || image == uais[0].Image {
+			// If an image wasn't specified or
+			// image matches the running UAI use that one
+			targetUai = uais[0]
+		} else {
+			// Start a new UAI if the image doesn't match
+			targetUai = uai.UaiCreate(image)
+		}
+
+	default:
+		if image == "" {
+			// If a specific image was not requested, prompt
+			// the user to select one of the running UAIs
+			uai.UaiPrettyPrint(uais)
+			fmt.Printf("Select a UAI by number: ")
+			reader := bufio.NewReader(os.Stdin)
+			input, _ := reader.ReadString('\n')
+			selection, err := strconv.Atoi(strings.TrimSuffix(input, "\n"))
+			if err != nil {
+				log.Fatal(err)
+			}
+			if (selection <= 0) || (selection > len(uais)) {
+				log.Fatal("Number was not valid")
+			}
+			targetUai = uais[selection-1]
+		} else {
+			// Attempt to find a UAI of the correct image.
+			// Create one if the right image isn't running
+			for i,u := range uais {
+				if (image == u.Image) {
+					targetUai = u
+					break
+				}
+				if i == len(uais)-1 {
+					targetUai = uai.UaiCreate(image)
+				}
+			}
+		}
+	}
+	waitForRunningReady(targetUai)
+	sshCmd = targetUai.ConnectionString
 	ec := runSshCmd(sshCmd)
 	if oneShot {
-		uai.UaiDelete(freshUai.Name)
+		uai.UaiDelete(targetUai.Name)
 	}
 	os.Exit(ec)
 
 }
 
 func init() {
+	startCmd.Flags().StringVar(&image, "image", "", "Name of UAI image to start")
 	rootCmd.AddCommand(startCmd)
 }
