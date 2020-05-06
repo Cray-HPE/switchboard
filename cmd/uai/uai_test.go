@@ -46,6 +46,15 @@ var twoUai = `
 	}
 ]`
 
+var listUaiImages = `
+{
+  "default_image": "bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest",
+  "image_list": [
+    "bis.local:5000/cray/cray-uas-sles15sp1:latest",
+    "bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest"
+  ]
+}`
+
 var deleteUai = `["Successfully deleted uai-alanm-ea059360"]`
 
 var prettyPrintOutput = `
@@ -65,6 +74,8 @@ func fakeExecCommand(command string, args...string) *exec.Cmd {
 		os.Setenv("HELPER_CMD_OUTPUT", twoUai)
 	case "delete":
 		os.Setenv("HELPER_CMD_OUTPUT", deleteUai)
+	case "images":
+		os.Setenv("HELPER_CMD_OUTPUT", listUaiImages)
 	}
 	cmd.Env = append(os.Environ(), "GO_WANT_HELPER_PROCESS=1")
 	return cmd
@@ -98,7 +109,7 @@ func TestUaiCreate(t *testing.T) {
 	execCommand = fakeExecCommand
 	defer func(){ execCommand = exec.Command }()
 	var newUai Uai
-	newUai = UaiCreate()
+	newUai = UaiCreate("")
 	if (newUai.Name != "uai-alanm-b1a72874") {
 		t.Errorf("Failed to decode a Uai from UaiCreate()")
 	}
@@ -114,6 +125,19 @@ func TestUaiList(t *testing.T) {
 	}
 	if (uais[1].Name != "uai-alanm-deadbeef") {
 		t.Errorf("Expected the second Uai to be 'uai-alanm-deadbeef'")
+	}
+}
+
+func TestUaiImagesList(t *testing.T) {
+	execCommand = fakeExecCommand
+	defer func(){ execCommand = exec.Command }()
+	var images UaiImages
+	images = UaiImagesList()
+	if (images.Default != "bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest") {
+		t.Errorf("Expected the default UAI image to be bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest")
+	}
+	if (images.List[0] != "bis.local:5000/cray/cray-uas-sles15sp1:latest") {
+		t.Errorf("Expected UAI image to be bis.local:5000/cray/cray-uas-sles15sp1:latest")
 	}
 }
 
