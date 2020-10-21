@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2020-10-27
+### Changed
+- CASMUAS-188: Add Dockerfile to create a container image to use as the SSH broker
+
+## [1.1.3] - 2020-10-22
+### Changed
+- Update the location of source in stash
+
 ## [1.1.2] - 2020-05-05
 ### Changed
 - CASMUAS-99: Add support for switchboard start --image

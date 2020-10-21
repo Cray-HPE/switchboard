@@ -1,9 +1,10 @@
-@Library("dst-shared") _
-rpmBuild (
-    channel: "casm-cloud-alerts",
-    slack_notify: ['FAILURE'],
-    product: "shasta-standard,shasta-premium",
-    target_node: "cn,ncn",
-    fanout_params: ["sle15", "sle15sp1"],
-    buildPrepScript: "switchboardBuildPrep.sh"
-)
+@Library('dst-shared') _
+dockerBuildPipeline {
+    repository="cray"
+    imagePrefix="cray"
+    app="uai-broker"
+    name="cray-uai-broker"
+    description="Cray User Access Instance Broker"
+    slackNotification = ["#casm-cloud-alerts", "", false, false, true, false]
+    product = "shasta-premium"
+}

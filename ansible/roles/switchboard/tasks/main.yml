@@ -1,6 +1,0 @@
----
-- name: Start the cray-switchboard-sshd service
-  systemd:
-    state: started
-    enabled: yes
-    name: cray-switchboard-sshd

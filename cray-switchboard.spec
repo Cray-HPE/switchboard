@@ -1,9 +1,7 @@
 #
 # RPM spec file for switchboard
-# Copyright 2019 Cray Inc. All Rights Reserved.
+# Copyright 2019-2020 Hewlett Packard Enterprise Development LP
 #
-%define crayctl_dir /opt/cray/crayctl
-%define ansible_dir %{crayctl_dir}/ansible_framework
 %define cmdname switchboard
 
 Name: cray-%{cmdname}
@@ -15,7 +13,6 @@ Source: %{name}-%{version}.tar.bz2
 Vendor: Cray Inc.
 Group: Productivity/Clustering/Computing
 
-BuildRequires: cme-premium-cf-crayctldeploy-buildmacro
 BuildRequires: systemd
 
 Requires: craycli
@@ -23,13 +20,10 @@ Requires: craycli
 %systemd_requires
 
 %description
-This package provides an ansible roles for deploying the Cray Switchboard
+This package provides files for deploying the Cray Switchboard
 project.
 
 %files
-%{ansible_dir}
-%{cme_premium_roles_dir}
-%{crayctl_dir}
 %dir %{_unitdir}
 %dir %{_bindir}
 %dir %{_sysconfdir}
@@ -48,15 +42,9 @@ go get
 go build -o switchboard main.go
 
 %install
-# Install ansible files
-%{__mkdir_p} %{buildroot}%{cme_premium_roles_dir}
-%{__mkdir_p} %{buildroot}%{crayctl_dir}
 %{__mkdir_p} %{buildroot}%{_unitdir}
 %{__mkdir_p} %{buildroot}%{_bindir}
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/%{cmdname}
-
-cp -R ansible %{buildroot}%{ansible_dir}
-cp -R ansible/roles/ %{buildroot}%{cme_premium_roles_dir}
 
 %{__install} -m 0644 src/cray-%{cmdname}-sshd.service %{buildroot}%{_unitdir}/cray-%{cmdname}-sshd.service
 %{__install} -m 0755 %{cmdname} %{buildroot}%{_bindir}/%{cmdname}
