@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"stash.us.cray.com/uan/switchboard/cmd/uai"
+	"stash.us.cray.com/uas/switchboard/cmd/uai"
 )
 
 // listCmd represents the list command
