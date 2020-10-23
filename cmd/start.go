@@ -12,7 +12,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
-	"stash.us.cray.com/uan/switchboard/cmd/uai"
+	"stash.us.cray.com/uas/switchboard/cmd/uai"
 )
 
 var startCmd = &cobra.Command{

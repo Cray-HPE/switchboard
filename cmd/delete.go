@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"stash.us.cray.com/uan/switchboard/cmd/uai"
+	"stash.us.cray.com/uas/switchboard/cmd/uai"
 )
 
 // deleteCmd represents the delete command

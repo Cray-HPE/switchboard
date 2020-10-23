@@ -1,4 +1,4 @@
-module stash.us.cray.com/uan/switchboard
+module stash.us.cray.com/uas/switchboard
 
 go 1.13
 

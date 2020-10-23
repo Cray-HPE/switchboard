@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/spf13/cobra"
-	"stash.us.cray.com/uan/switchboard/cmd/craycli"
+	"stash.us.cray.com/uas/switchboard/cmd/craycli"
 )
 
 // rootCmd represents the base command when called without any subcommands
