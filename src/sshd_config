@@ -11,4 +11,4 @@ UseDNS no
 
 Match User !root,*
 	PermitTTY yes
-	ForceCommand /usr/bin/switchboard start
+	ForceCommand /usr/bin/switchboard broker --class-id $UAI_CREATION_CLASS

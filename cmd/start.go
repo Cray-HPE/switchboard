@@ -1,18 +1,18 @@
+// Copyright 2020 Hewlett Packard Enterprise Development LP
 package cmd
 
 import (
 	"bufio"
 	"os"
-	"os/exec"
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 	"log"
 
-	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
+	"stash.us.cray.com/uas/switchboard/cmd/craycli"
 	"stash.us.cray.com/uas/switchboard/cmd/uai"
+	"stash.us.cray.com/uas/switchboard/cmd/util"
 )
 
 var startCmd = &cobra.Command{
@@ -25,91 +25,15 @@ SSH to a UAI already running if only one UAI is found
 Choose a UAI to SSH to if multiple are found`,
 	Run: start,
 }
-var s *spinner.Spinner
-
 var image string
-
-// SpinnerStart will start a spinner/waiting message that will go until we stop it
-func SpinnerStart(message string) {
-	fmt.Print(fmt.Sprintf("%s...", message))
-	s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
-	s.Start()
-}
-
-// SpinnerStop will stop/cancel a spinner
-func SpinnerStop() {
-	if s.Active() {
-		s.Stop()
-	}
-	fmt.Println()
-}
-
-func waitForRunningReady(targetUai uai.Uai) {
-	var uais []uai.Uai
-	var status string
-	if targetUai.StatusMessage + targetUai.Status == "Running: Ready" {
-		return
-	}
-	SpinnerStart("Waiting for UAI to be ready")
-	timeout := time.After(30 * time.Second)
-	tick := time.Tick(1 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			SpinnerStop()
-			fmt.Printf("Timeout waiting on %s to be 'Running: Ready'\n", targetUai.Name)
-			fmt.Printf("Last status was '%s'\n", status)
-			os.Exit(1)
-		case <-tick:
-			uais = uai.UaiList()
-			for _,uai := range uais {
-				if (targetUai.Name == uai.Name) {
-					status = uai.StatusMessage + uai.Status
-					break
-				}
-			}
-			if (status == "Running: Ready") {
-				SpinnerStop()
-				return
-			}
-		}
-	}
-}
-
-// There has to be a better way to do this but
-// It was not obvious how to get only the error number
-// rather than "exit code 123". (improve this later)
-func convertErrorStrToInt(err error) int {
-	var errNum int
-	if err != nil {
-		errS := strings.Fields(err.Error())
-		errNum, _ = strconv.Atoi(errS[2])
-	} else {
-		errNum = 0
-	}
-	return errNum
-}
-
-func runSshCmd(sshCmd string) int {
-	sshArgs := strings.Fields(sshCmd)
-	if sshOriginalCommand, exists := os.LookupEnv("SSH_ORIGINAL_COMMAND"); exists {
-		sshArgs = append(sshArgs, sshOriginalCommand)
-	}
-	sshExec := exec.Command(sshArgs[0], sshArgs[1:]...)
-	sshExec.Stdout = os.Stdout
-	sshExec.Stdin = os.Stdin
-	sshExec.Stderr = os.Stderr
-	sshExec.Start()
-	ec := sshExec.Wait()
-	return convertErrorStrToInt(ec)
-}
 
 func start(cmd *cobra.Command, args []string) {
 	var uais []uai.Uai
 	var images uai.UaiImages
-	var sshCmd string
 	var targetUai uai.Uai
 	var oneShot bool
+
+	craycli.CraycliInitialize()
 
 	// Check for UAI_ONE_SHOT which always creates
 	// and deletes the UAI after logging out
@@ -181,9 +105,8 @@ func start(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
-	waitForRunningReady(targetUai)
-	sshCmd = targetUai.ConnectionString
-	ec := runSshCmd(sshCmd)
+	util.WaitForRunningReady(targetUai, "", "")
+	ec := util.RunSshCmd(targetUai.ConnectionString, "")
 	if oneShot {
 		uai.UaiDelete(targetUai.Name)
 	}

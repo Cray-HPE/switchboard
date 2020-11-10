@@ -30,14 +30,7 @@ RUN mkdir -p /var/lib/sss/db \
              /var/lib/sss/pipes/private \
              /var/lib/sss/pubconf
 
-# Use craycli to drive switchboard logic
-# This will go away when the UAS admin API is available
-RUN zypper --non-interactive addrepo --no-gpgcheck \
-    http://car.dev.cray.com/artifactory/shasta-premium/CLOUD/sle15_sp1_ncn/x86_64/dev/master/ \
-    cloud-team && \
-    zypper install -y craycli \
-                      glibc-locale-base \
-                      openssh \
+RUN zypper install -y openssh \
                       sssd \
                       vim
 

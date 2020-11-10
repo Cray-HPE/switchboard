@@ -1,3 +1,4 @@
+// Copyright 2020 Hewlett Packard Enterprise Development LP
 package cmd
 
 import (
@@ -9,6 +10,7 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"stash.us.cray.com/uas/switchboard/cmd/craycli"
 	"stash.us.cray.com/uas/switchboard/cmd/uai"
 )
 
@@ -23,6 +25,9 @@ var deleteCmd = &cobra.Command{
 // TODO Make this work for multiple UAIs
 func delete(cmd *cobra.Command, args []string) {
 	var uais []uai.Uai
+
+	craycli.CraycliInitialize()
+
 	uais = uai.UaiList()
 	if len(uais) > 0 {
 		uai.UaiPrettyPrint(uais)
