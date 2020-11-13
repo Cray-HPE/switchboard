@@ -6,5 +6,5 @@ dockerBuildPipeline {
     name="cray-uai-broker"
     description="Cray User Access Instance Broker"
     slackNotification = ["#casm-cloud-alerts", "", false, false, true, false]
-    product = "shasta-premium"
+    product = "csm"
 }
