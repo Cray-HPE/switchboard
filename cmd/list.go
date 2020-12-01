@@ -1,7 +1,9 @@
+// Copyright 2020 Hewlett Packard Enterprise Development LP
 package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"stash.us.cray.com/uas/switchboard/cmd/craycli"
 	"stash.us.cray.com/uas/switchboard/cmd/uai"
 )
 
@@ -20,6 +22,9 @@ $ switchboard list
 
 func list(cmd *cobra.Command, args []string) {
 	var uais []uai.Uai
+
+	craycli.CraycliInitialize()
+
 	uais = uai.UaiList()
 	uai.UaiPrettyPrint(uais)
 }

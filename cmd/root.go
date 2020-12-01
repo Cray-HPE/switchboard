@@ -1,12 +1,11 @@
+// Copyright 2020 Hewlett Packard Enterprise Development LP
 package cmd
 
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/spf13/cobra"
-	"stash.us.cray.com/uas/switchboard/cmd/craycli"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,23 +19,9 @@ the Shasta system.
 
 The following commands are supported:
 switchboard start
+switchboard broker
 switchboard list
-switchboard delete)`,
-}
-
-func init() {
-	if _, err := exec.LookPath("cray"); err != nil {
-		fmt.Println("Could not find the cray cli command")
-		os.Exit(1)
-	}
-	if craycli.CraycliCheckOutput("No configuration exists") {
-		fmt.Println("The Cray CLI has not been initialized, running 'cray init':")
-		craycli.CraycliInteractive("cray", "init")
-	}
-	if craycli.CraycliCheckOutput("401 Unauthorized") {
-		fmt.Println("The Cray CLI has not been authorized, running 'cray auth login':")
-		craycli.CraycliInteractive("cray", "auth", "login")
-	}
+switchboard delete`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
