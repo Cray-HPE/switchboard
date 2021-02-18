@@ -7,4 +7,5 @@ dockerBuildPipeline {
     description="Cray User Access Instance Broker"
     slackNotification = ["#casm-cloud-alerts", "", false, false, true, false]
     product = "csm"
+    githubPushRepo = "Cray-HPE/switchboard"
 }
