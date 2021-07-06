@@ -20,7 +20,7 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp1:sles15sp1-build411 as base
+FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp2:sles15sp2-build235 as base
 
 RUN zypper update -y
 WORKDIR /app
