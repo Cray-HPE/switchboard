@@ -20,8 +20,9 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp1:sles15sp1-build411 as base
+FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp2:latest as base
 
+RUN zypper ref
 RUN zypper update -y
 WORKDIR /app
 
@@ -29,7 +30,7 @@ FROM base as build
 
 # Build the switchboard binary
 COPY . /app
-RUN zypper install -y go 
+RUN zypper install -y go
 RUN export GO111MODULE=on && \
     go get && \
     go build -o switchboard main.go 
@@ -53,6 +54,7 @@ RUN mkdir -p /var/lib/sss/db \
 RUN zypper install -y openssh \
                       sssd \
                       vim
+RUN zypper rm -y cpio
 
 # Set the locale for craycli
 ENV LC_ALL=C.UTF-8 LANG=C.UTF-8
