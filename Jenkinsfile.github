@@ -11,11 +11,13 @@ pipeline {
     }
 
     environment {
-        NAME = "cray-switchboard"
-        DESCRIPTION = "Cray User Access Instance Broker"
+        RPM_NAME = "cray-switchboard"
+        RMP_DESCRIPTION = "switchboard tool to support automative UAI creation"
+        BROKER_NAME = "cray-uai-broker"
+        BROKER_DESCRIPTION = "Cray User Access Instance Broker"
+        BROKER_DOCKER_ARGS = getDockerBuildArgs(name: env.BROKER_NAME, description: env.BROKER_DESCRIPTION)
         IS_STABLE = getBuildIsStable()
         VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
-        DOCKER_ARGS = getDockerBuildArgs(name: env.NAME, description: env.DESCRIPTION)
         BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
     }
 
@@ -45,7 +47,7 @@ pipeline {
         stage('Publish') {
             steps {
                 script {
-                    publishCsmDockerImage(image: env.NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                    publishCsmDockerImage(image: env.BROKER_NAME, tag: env.VERSION, isStable: env.IS_STABLE)
                     publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", arch: "x86_64", isStable: env.IS_STABLE)
                     publishCsmRpms(component: env.NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", arch: "src", isStable: env.IS_STABLE)
                 }

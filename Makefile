@@ -23,7 +23,6 @@
 # DOCKER
 NAME ?= cray-switchboard
 VERSION ?= $(shell cat .version)
-DOCKER_IMAGE ?= ${NAME}:${VERSION}
 
 # RPM
 SPEC_FILE ?= ${NAME}.spec
@@ -36,7 +35,7 @@ SOURCE_PATH := ${BUILD_DIR}/SOURCES/${SOURCE_NAME}.tar.bz2
 rpm: rpm_prepare rpm_package_source rpm_build_source rpm_build
 
 image:
-	docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
+	docker build --pull ${BROKER_DOCKER_ARGS} --tag '${BROKER_NAME}:${VERSION}' .
 
 test:
 	./runUnitTest.sh
