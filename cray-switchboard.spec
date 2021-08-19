@@ -36,11 +36,13 @@ BuildRequires: systemd
 
 Requires: craycli
 
-%systemd_requires
-
 %description
 This package provides files for deploying the Cray Switchboard
 project.
+
+%{!?_unitdir:
+%define _unitdir /usr/lib/systemd/system
+}
 
 %files
 %dir %{_unitdir}

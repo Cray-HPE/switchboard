@@ -1,0 +1,57 @@
+@Library('csm-shared-library') _
+
+pipeline {
+    agent {
+        label "metal-gcp-builder"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: "10"))
+        timestamps()
+    }
+
+    environment {
+        RPM_NAME = "cray-switchboard"
+        RMP_DESCRIPTION = "switchboard tool to support automative UAI creation"
+        BROKER_NAME = "cray-uai-broker"
+        BROKER_DESCRIPTION = "Cray User Access Instance Broker"
+        BROKER_DOCKER_ARGS = getDockerBuildArgs(name: env.BROKER_NAME, description: env.BROKER_DESCRIPTION)
+        IS_STABLE = getBuildIsStable()
+        VERSION = getDockerBuildVersion(isStable: env.IS_STABLE)
+        BUILD_METADATA = getRpmRevision(isStable: env.IS_STABLE)
+    }
+
+    stages {
+        stage("Test") {
+            steps {
+                sh "make test"
+            }
+        }
+
+        stage("Build") {
+            parallel {
+                stage('Image') {
+                    steps {
+                        sh "make image"
+                    }
+                }
+
+                stage('Rpm') {
+                    steps {
+                        sh "make rpm"
+                    }
+                }
+            }
+        }
+
+        stage('Publish') {
+            steps {
+                script {
+                    publishCsmDockerImage(image: env.BROKER_NAME, tag: env.VERSION, isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/RPMS/x86_64/*.rpm", arch: "x86_64", isStable: env.IS_STABLE)
+                    publishCsmRpms(component: env.RPM_NAME, pattern: "dist/rpmbuild/SRPMS/*.rpm", arch: "src", isStable: env.IS_STABLE)
+                }
+            }
+        }
+    }
+}
