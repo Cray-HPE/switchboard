@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,17 +22,15 @@
 package uai
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
+	"stash.us.cray.com/uas/switchboard/cmd/keys"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -65,6 +63,7 @@ type Uai struct {
 	Username         string `json:"username"`
 	ConnectionString string `json:"uai_connect_string"`
 	Image            string `json:"uai_img"`
+	IP               string `json:"uai_ip"`
 	Status           string `json:"uai_status"`
 	StatusMessage    string `json:"uai_msg"`
 	Host             string `json:"uai_host"`
@@ -220,44 +219,18 @@ func UaiAdminCreate(user string, classid string) Uai {
 		log.Fatal(err)
 	}
 
-	home, err := homedir.Dir()
+	// Get the user's public SSH key
+	publicKeyStr, err := keys.GetUaiPublicKey(user)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Check for an SSH key. Generate one if it does not exist
-	sshpublickey := home + "/.ssh/" + classid + ".pub"
-	_, err = os.Stat(sshpublickey)
-	if os.IsNotExist(err) {
-		err := exec.Command("ssh-keygen", "-f", strings.TrimSuffix(sshpublickey, ".pub"), "-N", "").Run()
-		if err != nil {
-			fmt.Printf("Failed to generate an SSH key\n")
-			log.Fatal(err)
-		}
-	}
-
-	// Read in the public key to a request body
-	file, err := os.Open(sshpublickey)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("publickey_str", classid+".pub")
-	if err != nil {
-		log.Fatal(err)
-	}
-	io.Copy(part, file)
-	writer.Close()
 
 	// Request a new UAI with the admin API
-	query := uasUrl + "/uais?" + "owner=" + user + "&class_id=" + classid + "&passwd_str=" + url.QueryEscape(passwdStr)
-	req, err := http.NewRequest(http.MethodPost, query, body)
+	query := uasUrl + "/uais?" + "owner=" + user + "&class_id=" + classid + "&passwd_str=" + url.QueryEscape(passwdStr) + "&publickey_str=" + url.QueryEscape(publicKeyStr)
+	req, err := http.NewRequest(http.MethodPost, query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", writer.FormDataContentType())
 	uasMgrClient := http.Client{
 		Timeout: time.Second * 5,
 	}

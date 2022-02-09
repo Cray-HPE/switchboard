@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -19,10 +19,25 @@
 // OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
-package main
+package keys
 
-import "stash.us.cray.com/uas/switchboard/cmd"
+import (
+	"fmt"
+)
 
-func main() {
-	cmd.Execute()
+func SetupHostKeys() (map[string]string, error) {
+	path := composeHostVaultPath()
+	keyMap, err := generate(true)
+	if err != nil {
+		return keyMap, fmt.Errorf("Error generating SSH host keys - %s\n", err)
+	}
+	// The following will either give us back an existing key map or store the one we propose and return it.
+	storedKeyMap, err := storeOrGetKeyMap(path, keyMap)
+	if err != nil {
+		return storedKeyMap, fmt.Errorf("Error storing / retrieving SSH host keys - %s\n", err)
+	}
+	if err = install("/etc/ssh", "root", storedKeyMap); err != nil {
+		return storedKeyMap, fmt.Errorf("Error installing SSH host keys - %s\n", err)
+	}
+	return storedKeyMap, nil
 }

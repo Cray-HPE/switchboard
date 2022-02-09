@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -38,6 +38,7 @@ uas' commands, switchboard will make sure the user is authenticated to
 the Shasta system. 
 
 The following commands are supported:
+switchboard hostkey
 switchboard start
 switchboard broker
 switchboard list

@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -31,6 +31,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"stash.us.cray.com/uas/switchboard/cmd/keys"
 	"stash.us.cray.com/uas/switchboard/cmd/uai"
 	"stash.us.cray.com/uas/switchboard/cmd/util"
 )
@@ -83,6 +84,10 @@ func broker(cmd *cobra.Command, args []string) {
 		}
 	}
 
+	// Set up the user's internal SSH session keys
+	if _, err := keys.SetupInternalKeys(user.Username); err != nil {
+		log.Fatal(err)
+	}
 	// Get the list of UAIs available
 	uais = uai.UaiAdminList(user.Username, classid)
 
@@ -110,7 +115,12 @@ func broker(cmd *cobra.Command, args []string) {
 	}
 
 	util.WaitForRunningReady(targetUai, user.Username, classid)
-	ec := util.RunSshCmd(targetUai.ConnectionString, "~/.ssh/"+classid)
+	knownHosts, err := keys.GetHostKeys(user.Username, targetUai.IP)
+	if err != nil {
+		log.Fatalf("error preloading internal host keys - %s", err)
+	}
+	sshCmd := fmt.Sprintf("%s -o UserKnownHostsFile=%s", targetUai.ConnectionString, knownHosts)
+	ec := util.RunSshCmd(sshCmd, keys.KeyFilePath(user.Username))
 	os.Exit(ec)
 
 }
