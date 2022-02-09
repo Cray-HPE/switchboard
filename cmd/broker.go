@@ -61,8 +61,8 @@ func broker(cmd *cobra.Command, args []string) {
 	// Get a list of allowable classes
 	classes = uai.UaiClassesList()
 	if classid != "" {
-		for i,cls := range classes {
-			if (cls.ClassID == classid) {
+		for i, cls := range classes {
+			if cls.ClassID == classid {
 				break
 			}
 			if i == len(classes)-1 {
@@ -71,8 +71,8 @@ func broker(cmd *cobra.Command, args []string) {
 			}
 		}
 	} else {
-		for i,cls := range classes {
-			if (cls.Default) {
+		for i, cls := range classes {
+			if cls.Default {
 				classid = cls.ClassID
 				break
 			}
@@ -82,7 +82,6 @@ func broker(cmd *cobra.Command, args []string) {
 			}
 		}
 	}
-
 
 	// Get the list of UAIs available
 	uais = uai.UaiAdminList(user.Username, classid)

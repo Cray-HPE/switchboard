@@ -85,7 +85,7 @@ func RunSshCmd(sshCmd string, sshpublickey string) int {
 func WaitForRunningReady(targetUai uai.Uai, user string, classid string) {
 	var uais []uai.Uai
 	var status string
-	if targetUai.StatusMessage + targetUai.Status == "Running: Ready" {
+	if targetUai.StatusMessage+targetUai.Status == "Running: Ready" {
 		return
 	}
 	SpinnerStart("Waiting for UAI to be ready")
@@ -104,13 +104,13 @@ func WaitForRunningReady(targetUai uai.Uai, user string, classid string) {
 			} else {
 				uais = uai.UaiAdminList(user, classid)
 			}
-			for _,uai := range uais {
-				if (targetUai.Name == uai.Name) {
+			for _, uai := range uais {
+				if targetUai.Name == uai.Name {
 					status = uai.StatusMessage + uai.Status
 					break
 				}
 			}
-			if (status == "Running: Ready") {
+			if status == "Running: Ready" {
 				SpinnerStop()
 				return
 			}

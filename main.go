@@ -24,5 +24,5 @@ package main
 import "stash.us.cray.com/uas/switchboard/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }

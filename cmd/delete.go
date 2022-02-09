@@ -23,11 +23,11 @@ package cmd
 
 import (
 	"bufio"
-	"os"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
-	"log"
 
 	"github.com/spf13/cobra"
 	"stash.us.cray.com/uas/switchboard/cmd/craycli"
@@ -38,8 +38,8 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete User Access Instances currently running",
-	Long: `Delete User Access Instances currently running.`,
-	Run: delete,
+	Long:  `Delete User Access Instances currently running.`,
+	Run:   delete,
 }
 
 // TODO Make this work for multiple UAIs
