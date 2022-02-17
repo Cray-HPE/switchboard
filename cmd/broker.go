@@ -119,7 +119,7 @@ func broker(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatalf("error preloading internal host keys - %s", err)
 	}
-	sshCmd := fmt.Sprintf("%s -o UserKnownHostsFile=%s", targetUai.ConnectionString, knownHosts)
+	sshCmd := fmt.Sprintf("%s -o TCPKeepalive=true -o UserKnownHostsFile=%s", targetUai.ConnectionString, knownHosts)
 	ec := util.RunSshCmd(sshCmd, keys.KeyFilePath(user.Username))
 	os.Exit(ec)
 
