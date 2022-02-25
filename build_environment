@@ -1,0 +1,7 @@
+# Environment variables to be pulled into Docker based on what is
+# in the local environment when building switchboard
+RPM_NAME
+RPM_DESCRIPTION
+IS_STABLE
+VERSION
+BUILD_METADATA
