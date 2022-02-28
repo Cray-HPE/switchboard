@@ -23,6 +23,6 @@
 # Docker file to build a temporary builder image so we can control the
 # build environment for switchboard when building the RPMs.
 
-FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp2:latest as base
+FROM artifactory.algol60.net/registry.suse.com/suse/sle15:15.3 as base
 RUN zypper install -y gcc go rpmbuild git
 WORKDIR /build

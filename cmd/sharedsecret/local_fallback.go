@@ -25,11 +25,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/sys/unix"
 	"log"
 	"os"
 	"path"
 	"strconv"
+
+	"golang.org/x/sys/unix"
 )
 
 // If the cluster we are in is not set up with vault authorizations for
