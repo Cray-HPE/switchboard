@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -19,10 +19,33 @@
 // OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
-package main
+package cmd
 
-import "stash.us.cray.com/uas/switchboard/cmd"
+import (
+	"github.com/spf13/cobra"
+	"log"
+	"os"
+	"stash.us.cray.com/uas/switchboard/cmd/keys"
+)
 
-func main() {
-	cmd.Execute()
+var hostkeyCmd = &cobra.Command{
+	Use:   "hostkey",
+	Short: "Create, Distribute and Install a Broker UAI SSH Host Key",
+	Long: `Create an SSH Host Key for a Broker UAI, Register it with
+Vault so replicas can share it, and install it, and install it in the Broker UAI.
+If a host key for this Broker UAI is already registered with Vault, use that one.
+`,
+	Run: hostkey,
+}
+
+func hostkey(cmd *cobra.Command, args []string) {
+	_, err := keys.SetupHostKeys()
+	if err != nil {
+		log.Fatal(err)
+	}
+	os.Exit(0)
+}
+
+func init() {
+	rootCmd.AddCommand(hostkeyCmd)
 }

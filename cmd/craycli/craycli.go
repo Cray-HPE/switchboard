@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -32,18 +32,18 @@ import (
 var execCommand = exec.Command
 
 func CraycliInitialize() {
-        if _, err := exec.LookPath("cray"); err != nil {
-                fmt.Println("Could not find the cray cli command")
-                os.Exit(1)
-        }
-        if CraycliCheckOutput("No configuration exists") {
-                fmt.Println("The Cray CLI has not been initialized, running 'cray init':")
-                CraycliInteractive("cray", "init")
-        }
-        if CraycliCheckOutput("401 Unauthorized") {
-                fmt.Println("The Cray CLI has not been authorized, running 'cray auth login':")
-                CraycliInteractive("cray", "auth", "login")
-        }
+	if _, err := exec.LookPath("cray"); err != nil {
+		fmt.Println("Could not find the cray cli command")
+		os.Exit(1)
+	}
+	if CraycliCheckOutput("No configuration exists") {
+		fmt.Println("The Cray CLI has not been initialized, running 'cray init':")
+		CraycliInteractive("cray", "init")
+	}
+	if CraycliCheckOutput("401 Unauthorized") {
+		fmt.Println("The Cray CLI has not been authorized, running 'cray auth login':")
+		CraycliInteractive("cray", "auth", "login")
+	}
 }
 
 func CraycliCheckOutput(cliOutput string) bool {

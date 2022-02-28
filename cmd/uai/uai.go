@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,20 +22,18 @@
 package uai
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
+	"stash.us.cray.com/uas/switchboard/cmd/keys"
 	"strings"
 	"text/tabwriter"
 	"time"
-	"encoding/json"
 
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -44,7 +42,7 @@ import (
 var execCommand = exec.Command
 var uasUrl = "http://cray-uas-mgr.services.svc.cluster.local:8088/v1/admin"
 
-/* 
+/*
 A struct to represent a UAI from uas-mgr which has a json representation of
 [
 	{
@@ -61,26 +59,27 @@ A struct to represent a UAI from uas-mgr which has a json representation of
 ]
 */
 type Uai struct {
-	Name string `json:"uai_name"`
-	Username string `json:"username"`
+	Name             string `json:"uai_name"`
+	Username         string `json:"username"`
 	ConnectionString string `json:"uai_connect_string"`
-	Image string `json:"uai_img"`
-	Status string `json:"uai_status"`
-	StatusMessage string `json:"uai_msg"`
-	Host string `json:"uai_host"`
-	Age string `json:"uai_age"`
+	Image            string `json:"uai_img"`
+	IP               string `json:"uai_ip"`
+	Status           string `json:"uai_status"`
+	StatusMessage    string `json:"uai_msg"`
+	Host             string `json:"uai_host"`
+	Age              string `json:"uai_age"`
 }
 
 type UaiImages struct {
-	Default string `json:"default_image"`
-	List []string `json:"image_list"`
+	Default string   `json:"default_image"`
+	List    []string `json:"image_list"`
 }
 
 type UaiClasses struct {
-	ClassID string `json:"class_id"`
-	Comment string `json:"comment"`
-	Default bool `json:"default"`
-	PublicSSH bool `json:"public_ssh"`
+	ClassID          string `json:"class_id"`
+	Comment          string `json:"comment"`
+	Default          bool   `json:"default"`
+	PublicSSH        bool   `json:"public_ssh"`
 	UAICreationClass string `json:"uai_creation_class"`
 }
 
@@ -107,7 +106,7 @@ func UaiCreate(image string) Uai {
 		log.Fatal(err)
 	}
 	err = json.NewDecoder(stdout).Decode(&uai)
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	if err := cmd.Wait(); err != nil {
@@ -184,7 +183,7 @@ func UaiClassesList() []UaiClasses {
 }
 
 func UaiAdminList(user string, classid string) []Uai {
-	query := uasUrl+"/uais?"+"owner="+user+"&class_id="+classid
+	query := uasUrl + "/uais?" + "owner=" + user + "&class_id=" + classid
 	req, err := http.NewRequest(http.MethodGet, query, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -220,44 +219,18 @@ func UaiAdminCreate(user string, classid string) Uai {
 		log.Fatal(err)
 	}
 
-	home, err := homedir.Dir()
+	// Get the user's public SSH key
+	publicKeyStr, err := keys.GetUaiPublicKey(user)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// Check for an SSH key. Generate one if it does not exist
-	sshpublickey := home+"/.ssh/"+classid+".pub"
-	_, err = os.Stat(sshpublickey)
-	if os.IsNotExist(err) {
-		err := exec.Command("ssh-keygen", "-f", strings.TrimSuffix(sshpublickey, ".pub"), "-N", "").Run()
-		if err != nil {
-			fmt.Printf("Failed to generate an SSH key\n")
-			log.Fatal(err)
-		}
-	}
-
-	// Read in the public key to a request body
-	file, err := os.Open(sshpublickey)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("publickey_str", classid+".pub")
-	if err != nil {
-		log.Fatal(err)
-	}
-	io.Copy(part, file)
-	writer.Close()
 
 	// Request a new UAI with the admin API
-	query := uasUrl+"/uais?"+"owner="+user+"&class_id="+classid+"&passwd_str="+url.QueryEscape(passwdStr)
-	req, err := http.NewRequest(http.MethodPost, query, body)
+	query := uasUrl + "/uais?" + "owner=" + user + "&class_id=" + classid + "&passwd_str=" + url.QueryEscape(passwdStr) + "&publickey_str=" + url.QueryEscape(publicKeyStr)
+	req, err := http.NewRequest(http.MethodPost, query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Header.Add("Content-Type", writer.FormDataContentType())
 	uasMgrClient := http.Client{
 		Timeout: time.Second * 5,
 	}
@@ -285,7 +258,7 @@ func UaiAdminCreate(user string, classid string) Uai {
 // Delete a UAI by name
 func UaiDelete(uais string) {
 	cmd := execCommand("cray", "uas", "delete", "--format", "json",
-			 "--uai-list", uais)
+		"--uai-list", uais)
 	_, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
@@ -294,7 +267,7 @@ func UaiDelete(uais string) {
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
-	if (err != nil) {
+	if err != nil {
 		log.Fatal(err)
 	}
 	if err := cmd.Wait(); err != nil {
@@ -314,10 +287,10 @@ func UaiPrettyPrint(uais []Uai) {
 	if len(uais) > 0 {
 		fmt.Fprintln(w, "#\tName\tStatus\tAge\tImage")
 	}
-	for i,u := range uais {
+	for i, u := range uais {
 		fmt.Fprintf(w, "%d\t%s\t%s%s\t%s\t%s\n", i+1, u.Name,
-				u.StatusMessage, u.Status,
-				u.Age, u.Image)
+			u.StatusMessage, u.Status,
+			u.Age, u.Image)
 	}
 	w.Flush()
 }

@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -22,11 +22,11 @@
 package uai
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"testing"
-	"encoding/json"
 )
 
 var oneUai = `
@@ -84,7 +84,7 @@ var prettyPrintOutput = `
 2       uai-alanm-deadbeef      Running:Ready                   15s     bis.local:5000/cray/cray-uas-sles15-slurm:latest
 `
 
-func fakeExecCommand(command string, args...string) *exec.Cmd {
+func fakeExecCommand(command string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestHelperProcess", "--", command}
 	cs = append(cs, args...)
 	cmd := exec.Command(os.Args[0], cs...)
@@ -113,12 +113,12 @@ func TestHelperProcess(t *testing.T) {
 func TestUai(t *testing.T) {
 	var uai Uai
 	err := json.Unmarshal([]byte(oneUai), &uai)
-	if (err != nil) {
+	if err != nil {
 		t.Errorf("Could not decode oneUai")
 	}
 	var uais []Uai
 	err = json.Unmarshal([]byte(twoUai), &uais)
-	if (err != nil) {
+	if err != nil {
 		t.Errorf("Could not decode twoUai")
 	}
 	if len(uais) != 2 {
@@ -128,48 +128,48 @@ func TestUai(t *testing.T) {
 
 func TestUaiCreate(t *testing.T) {
 	execCommand = fakeExecCommand
-	defer func(){ execCommand = exec.Command }()
+	defer func() { execCommand = exec.Command }()
 	var newUai Uai
 	newUai = UaiCreate("")
-	if (newUai.Name != "uai-alanm-b1a72874") {
+	if newUai.Name != "uai-alanm-b1a72874" {
 		t.Errorf("Failed to decode a Uai from UaiCreate()")
 	}
 }
 
 func TestUaiList(t *testing.T) {
 	execCommand = fakeExecCommand
-	defer func(){ execCommand = exec.Command }()
+	defer func() { execCommand = exec.Command }()
 	var uais []Uai
 	uais = UaiList()
-	if (uais[0].Name != "uai-alanm-b1a72874") {
+	if uais[0].Name != "uai-alanm-b1a72874" {
 		t.Errorf("Expected the second Uai to be 'uai-alanm-b1a72874'")
 	}
-	if (uais[1].Name != "uai-alanm-deadbeef") {
+	if uais[1].Name != "uai-alanm-deadbeef" {
 		t.Errorf("Expected the second Uai to be 'uai-alanm-deadbeef'")
 	}
 }
 
 func TestUaiImagesList(t *testing.T) {
 	execCommand = fakeExecCommand
-	defer func(){ execCommand = exec.Command }()
+	defer func() { execCommand = exec.Command }()
 	var images UaiImages
 	images = UaiImagesList()
-	if (images.Default != "bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest") {
+	if images.Default != "bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest" {
 		t.Errorf("Expected the default UAI image to be bis.local:5000/cray/cray-uas-sles15sp1-slurm:latest")
 	}
-	if (images.List[0] != "bis.local:5000/cray/cray-uas-sles15sp1:latest") {
+	if images.List[0] != "bis.local:5000/cray/cray-uas-sles15sp1:latest" {
 		t.Errorf("Expected UAI image to be bis.local:5000/cray/cray-uas-sles15sp1:latest")
 	}
 }
 
 func TestUaiDelete(t *testing.T) {
 	execCommand = fakeExecCommand
-	defer func(){ execCommand = exec.Command }()
+	defer func() { execCommand = exec.Command }()
 	UaiDelete("uai-alanm-b1a72874")
 }
 
 func TestUaiPrettyPrint(t *testing.T) {
 	execCommand = fakeExecCommand
-        defer func(){ execCommand = exec.Command }()
+	defer func() { execCommand = exec.Command }()
 	UaiPrettyPrint(UaiList())
 }

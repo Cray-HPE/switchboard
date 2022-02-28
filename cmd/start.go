@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -23,11 +23,11 @@ package cmd
 
 import (
 	"bufio"
-	"os"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
-	"log"
 
 	"github.com/spf13/cobra"
 	"stash.us.cray.com/uas/switchboard/cmd/craycli"
@@ -69,8 +69,8 @@ func start(cmd *cobra.Command, args []string) {
 	// Get a list of allowable images
 	images = uai.UaiImagesList()
 	if image != "" {
-		for i,img := range images.List {
-			if (img == image) {
+		for i, img := range images.List {
+			if img == image {
 				break
 			}
 			if i == len(images.List)-1 {
@@ -114,8 +114,8 @@ func start(cmd *cobra.Command, args []string) {
 		} else {
 			// Attempt to find a UAI of the correct image.
 			// Create one if the right image isn't running
-			for i,u := range uais {
-				if (image == u.Image) {
+			for i, u := range uais {
+				if image == u.Image {
 					targetUai = u
 					break
 				}

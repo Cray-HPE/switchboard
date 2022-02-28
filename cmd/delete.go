@@ -1,6 +1,6 @@
 // MIT License
 //
-// (C) Copyright [2020] Hewlett Packard Enterprise Development LP
+// (C) Copyright [2020-2022] Hewlett Packard Enterprise Development LP
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software"),
@@ -23,11 +23,11 @@ package cmd
 
 import (
 	"bufio"
-	"os"
 	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
-	"log"
 
 	"github.com/spf13/cobra"
 	"stash.us.cray.com/uas/switchboard/cmd/craycli"
@@ -38,8 +38,8 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete User Access Instances currently running",
-	Long: `Delete User Access Instances currently running.`,
-	Run: delete,
+	Long:  `Delete User Access Instances currently running.`,
+	Run:   delete,
 }
 
 // TODO Make this work for multiple UAIs
