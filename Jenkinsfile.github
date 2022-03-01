@@ -57,6 +57,13 @@ pipeline {
                 sh "./builder.sh rpm"
             }
         }
+        stage("Chown") {
+            steps {
+                // Need to chown the files and dirs in the workspace so that
+                // publish can run.
+                postChownFiles()
+            }
+        }
         stage("BuilderClean") {
             steps {
                 sh "docker rmi --force switchboard-builder:latest"
